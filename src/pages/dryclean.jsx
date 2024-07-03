@@ -8,73 +8,37 @@ export default function DaftarPaketDryClean() {
 
   useEffect(() => {
     const fetchOrderData = async () => {
-      setOrders([
-        {
-          order_id: 1,
-          name: "Budi",
-          quantity: 5,
-          total_price: 250000,
-          amount_paid: 250000,
-          change: 0,
-          status: "Selesai",
-        },
-        {
-          order_id: 2,
-          name: "Ani",
-          quantity: 2,
-          total_price: 100000,
-          amount_paid: 100000,
-          change: 0,
-          status: "Proses",
-        },
-        {
-          order_id: 3,
-          name: "Joko",
-          quantity: 3,
-          total_price: 150000,
-          amount_paid: 150000,
-          change: 0,
-          status: "Proses",
-        },
-        {
-          order_id: 4,
-          name: "Rina",
-          quantity: 1,
-          total_price: 50000,
-          amount_paid: 50000,
-          change: 0,
-          status: "Proses",
-        },
-        {
-          order_id: 5,
-          name: "Dodi",
-          quantity: 4,
-          total_price: 200000,
-          amount_paid: 200000,
-          change: 0,
-          status: "Proses",
-        },
-        {
-          order_id: 6,
-          name: "Sari",
-          quantity: 2,
-          total_price: 100000,
-          amount_paid: 100000,
-          change: 0,
-          status: "Proses",
-        },
-        {
-          order_id: 7,
-          name: "Rudi",
-          quantity: 3,
-          total_price: 150000,
-          amount_paid: 150000,
-          change: 0,
-          status: "Proses",
-        },
-      ]);
+      try {
+        const response = await fetch(
+          "http://127.0.0.1:5000/pesananlaundry/dryclean"
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
+        const data = await response.json(); // Assuming your API returns JSON data
+
+        // Format tanggal_pemesanan jika perlu
+        const formattedOrders = data.map((order) => ({
+          ...order,
+          tanggal_pemesanan: new Date(
+            order.tanggal_pemesanan
+          ).toLocaleDateString("id-ID", {
+            weekday: "long",
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          }),
+          // Ganti type_id dengan label sesuai mapping
+          type: typeLabels[order.type_id],
+        }));
+        setOrders(formattedOrders); // Set state with fetched and formatted data
+      } catch (error) {
+        console.error("Fetch order data error: ", error);
+      }
     };
+
     fetchOrderData();
+    console.log(orders);
   }, []);
 
   return (

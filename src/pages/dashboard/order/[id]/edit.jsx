@@ -1,28 +1,59 @@
 import Navbar from "@/components/Navbar";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function OrderDetail() {
   const router = useRouter();
   const { id } = router.query;
+  // if (id) {
+  //   console.log(id);
+  // }
 
-  // State untuk mengelola input teks
-  const [orderDetails, setOrderDetails] = useState({
-    nama: "",
-    nomor_telepon: "",
-    alamat: "",
-    tanggal_pemesanan: "",
-    tanggal_pengambilan: "",
-    estimasiPengerjaan: "",
-    type_id: "",
-    berat_kg: "",
-    hargaPerKg: "Rp. 10.000,-",
-    status: "Proses",
-    total_harga: "",
-    total_bayar: "",
-    keterangan: "",
-  });
+  // const { orderDetailsId, setOrderDetailsId } = useState({});
+  // setOrderDetailsId(id);
+  // console.log(orderDetailsId);
+
+  const [orderDetails, setOrderDetails] = useState({});
+
+  useEffect(() => {
+    // async function fetchOrderDetail(id) {
+    //   await axios.get(`http://127.0.0.1:5000/pesananlaundry/${id}`).then(
+    //     (response) => {
+    //       if (!response) {
+    //         alert("Failed to fetch data");
+    //       }
+    //       const data = response.json();
+    //       // console.log(JSON.stringify(response));
+    //       setOrderDetails(response.json());
+    //     }
+    //   );
+    // }
+    // console.log(id);
+
+    async function fetchOrderDetail(id) {
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:5000/pesananlaundry/${id}`
+        );
+        if (!response) {
+          alert("Failed to fetch data");
+        }
+        const data = response.data[0];
+        console.log(data);
+        setOrderDetails(data);
+      } catch (error) {
+        console.error("Fetch order data error: ", error);
+      }
+    }
+
+    // const data = async(id)=> {
+
+    // }
+    if (id) fetchOrderDetail(id);
+  }, [id]);
+
+  // console.log(orderDetails);
 
   // Handle change
   const handleChange = (e) => {
@@ -35,8 +66,8 @@ export default function OrderDetail() {
     // Tambahkan logika untuk menambahkan data baru di sini
     const fetchOrderData = async () => {
       try {
-        const response = await axios.post(
-          "http://127.0.0.1:5000/pesananlaundry",
+        const response = await axios.put(
+          `http://127.0.0.1:5000/pesananlaundry/${id}`,
           {
             data: orderDetails,
           }
@@ -50,6 +81,7 @@ export default function OrderDetail() {
       }
     };
     fetchOrderData();
+    console.log("Data baru ditambahkan:", orderDetails);
   };
 
   return (
@@ -114,21 +146,18 @@ export default function OrderDetail() {
                     onChange={handleChange}
                   />
                   <input
-                    type="datetime-local"
                     className="border border-gray-300 py-2 ps-6 w-full bg-white text-black"
                     name="tanggal_pemesanan"
                     value={orderDetails.tanggal_pemesanan}
                     onChange={handleChange}
                   />
                   <input
-                    type="datetime-local"
                     className="border border-gray-300 py-2 ps-6 w-full bg-white text-black"
                     name="tanggal_pengambilan"
                     value={orderDetails.tanggal_pengambilan}
                     onChange={handleChange}
                   />
                   <input
-                    type="text"
                     className="border border-gray-300 py-2 ps-6 w-full bg-white text-black"
                     name="estimasiPengerjaan"
                     value="7 hari"
@@ -165,7 +194,7 @@ export default function OrderDetail() {
                     Harga Per-Kg
                   </h3>
                   <p className="border border-gray-300 py-2 ps-4 w-full bg-white text-black mb-2">
-                    {orderDetails.hargaPerKg}
+                    Rp. 10.000,-
                   </p>
                 </div>
                 <div className="w-1/3">
@@ -175,7 +204,7 @@ export default function OrderDetail() {
                   <input
                     className="border border-gray-300 py-2 ps-4 w-full bg-white text-black mb-2"
                     name="total_harga"
-                    value={orderDetails.totalBayar}
+                    value={orderDetails.total_harga}
                     onChange={handleChange}
                   />
                 </div>

@@ -1,10 +1,14 @@
 import Navbar from "@/components/Navbar";
+import axios from "axios";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
   const [orders, setOrders] = useState([]);
+  const [dashboard, setDashboard] = useState([]);
+  const router = useRouter();
 
   // Mapping untuk type_id
   const typeLabels = {
@@ -37,6 +41,14 @@ export default function DashboardPage() {
           type: typeLabels[order.type_id],
         }));
         setOrders(formattedOrders); // Set state with fetched and formatted data
+
+        const dashboard = await axios.get("http://127.0.0.1:5000/dashboard");
+        if (!dashboard) {
+          throw new Error("Failed to fetch data");
+        }
+
+        const datas = dashboard.data;
+        setDashboard(datas);
       } catch (error) {
         console.error("Fetch order data error: ", error);
       }
@@ -45,6 +57,13 @@ export default function DashboardPage() {
     fetchOrderData();
   }, []);
 
+  async function deleteOrder(id) {
+    const res = await axios.delete(
+      `http://127.0.0.1:5000/pesananlaundry/${id}`
+    );
+    if (res) router.reload();
+    // console.log("Delete order with id: ", id);
+  }
   return (
     <div className="min-h-screen text-black bg-sky-100">
       <Navbar />
@@ -70,7 +89,9 @@ export default function DashboardPage() {
           <div className="bg-white rounded-md px-12 py-3 flex justify-between items-center w-1/3">
             <div>
               <h4 className="text-gray-400">Total Karyawan</h4>
-              <p className="text-xl font-semibold mt-2">5</p>
+              <p className="text-xl font-semibold mt-2">
+                {dashboard.karyawan_count}
+              </p>
             </div>
             <Image
               src="/karyawan.png"
@@ -83,7 +104,9 @@ export default function DashboardPage() {
           <div className="bg-white rounded-md px-12 py-3 flex justify-between items-center w-1/3">
             <div>
               <h4 className="text-gray-400">Total Order</h4>
-              <p className="text-xl font-semibold mt-2">7</p>
+              <p className="text-xl font-semibold mt-2">
+                {dashboard.pesananlaundry_count}
+              </p>
             </div>
             <Image
               src="/total-order.png"
@@ -96,7 +119,7 @@ export default function DashboardPage() {
           <div className="bg-white rounded-md px-12 py-3 flex justify-between items-center w-1/3">
             <div>
               <h4 className="text-gray-400">Jumlah Paket Tersedia</h4>
-              <p className="text-xl font-semibold mt-2">15</p>
+              <p className="text-xl font-semibold mt-2">3</p>
             </div>
             <Image
               src="/jumlah-paket.png"
@@ -145,12 +168,17 @@ export default function DashboardPage() {
                         Detail
                       </Link>
                       <Link
-                        href={`/dashboard/order/edit/${order.pesanan_id}`}
+                        href={`/dashboard/order/${order.pesanan_id}/edit`}
                         className="ms-2 bg-green-500 text-white px-2 py-1 rounded-md text-xs"
                       >
                         Edit
                       </Link>
-                      <button className="ms-2 bg-red-500 text-white px-2 py-1 rounded-md text-xs">
+                      <button
+                        className="ms-2 bg-red-500 text-white px-2 py-1 rounded-md text-xs"
+                        onClick={() => {
+                          deleteOrder(order.pesanan_id);
+                        }}
+                      >
                         Hapus
                       </button>
                     </td>
