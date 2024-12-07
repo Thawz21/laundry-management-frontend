@@ -7,39 +7,18 @@ export default function Employees() {
 
   useEffect(() => {
     const fetchEmployeeData = async () => {
-      /*
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nama VARCHAR(100),
-        nomor_telepon VARCHAR(15),
-        email VARCHAR(100),
-      */
-      setEmployees([
-        {
-          id: 1,
-          nama: "Budi",
-          nomor_telepon: "81234567890",
-          email: "budi@gmail.com",
-        },
-        {
-          id: 2,
-          nama: "Ani",
-          nomor_telepon: "82345678901",
-          email: "ani@gmail.com",
-        },
-        {
-          id: 3,
-          nama: "Nabil",
-          nomor_telepon: "83456789012",
-          email: "nabil@gmail.com",
-        },
-        {
-          id: 4,
-          nama: "Kelvin",
-          nomor_telepon: "84567890123",
-          email: "kelvin@gmail.com",
-        },
-      ]);
+      try {
+        const response = await fetch("http://127.0.0.1:5000/karyawan");
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
+        const data = await response.json();
+        setEmployees(data);
+      } catch (error) {
+        console.error("Fetch employee data error: ", error);
+      }
     };
+
     fetchEmployeeData();
   }, []);
 

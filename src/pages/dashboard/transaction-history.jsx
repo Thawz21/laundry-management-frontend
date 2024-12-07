@@ -5,93 +5,44 @@ import { useEffect, useState } from "react";
 export default function TransactionHistory() {
   const [transactionHistories, setTransactionHistories] = useState([]);
 
+  // Mapping untuk type_id
+  const typeLabels = {
+    1: 'cuci komplit',
+    2: 'dry clean',
+    3: 'cuci satuan'
+  };
+
   useEffect(() => {
-    const fetchTransactionHistories = async () => {
-      /*
-        pesanan_id,
-        nama,
-        jenis_layanan,
-        jumlah,
-        total,
-        uang_bayar,
-        kembalian,
-        status
-      */
-      setTransactionHistories([
-        {
-          pesanan_id: 1,
-          nama: "Budi",
-          jenis_layanan: "Cuci Komplit",
-          jumlah: 5,
-          total: 250000,
-          uang_bayar: 300000,
-          kembalian: 50000,
-          status: "Selesai",
-        },
-        {
-          pesanan_id: 2,
-          nama: "Ani",
-          jenis_layanan: "Cuci Komplit",
-          jumlah: 2,
-          total: 100000,
-          uang_bayar: 150000,
-          kembalian: 50000,
-          status: "Proses",
-        },
-        {
-          pesanan_id: 3,
-          nama: "Joko",
-          jenis_layanan: "Cuci Komplit",
-          jumlah: 3,
-          total: 150000,
-          uang_bayar: 200000,
-          kembalian: 50000,
-          status: "Proses",
-        },
-        {
-          pesanan_id: 4,
-          nama: "Rina",
-          jenis_layanan: "Cuci Komplit",
-          jumlah: 1,
-          total: 50000,
-          uang_bayar: 60000,
-          kembalian: 10000,
-          status: "Proses",
-        },
-        {
-          pesanan_id: 5,
-          nama: "Dodi",
-          jenis_layanan: "Cuci Komplit",
-          jumlah: 4,
-          total: 200000,
-          uang_bayar: 250000,
-          kembalian: 50000,
-          status: "Selesai",
-        },
-        {
-          pesanan_id: 6,
-          nama: "Sari",
-          jenis_layanan: "Cuci Komplit",
-          jumlah: 2,
-          total: 100000,
-          uang_bayar: 150000,
-          kembalian: 50000,
-          status: "Proses",
-        },
-        {
-          pesanan_id: 7,
-          nama: "Rudi",
-          jenis_layanan: "Cuci Komplit",
-          jumlah: 3,
-          total: 150000,
-          uang_bayar: 200000,
-          kembalian: 50000,
-          status: "Proses",
-        },
-      ]);
+    const fetchOrderData = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:5000/pesananlaundry");
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const data = await response.json(); // Assuming your API returns JSON data
+
+        // Filter only completed orders (assuming 'completed' status is represented by 'completed')
+        const completedOrders = data.filter(order => order.status === 'selesai'); 
+
+        // Format tanggal_pemesanan jika perlu
+        const formattedOrders = completedOrders.map(order => ({
+          ...order,
+          tanggal_pemesanan: new Date(order.tanggal_pemesanan).toLocaleDateString('id-ID', {
+            weekday: 'long',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          }),
+          // Ganti type_id dengan label sesuai mapping
+          type: typeLabels[order.type_id]
+        }));
+        setTransactionHistories(formattedOrders); // Set state with fetched and formatted data
+      } catch (error) {
+        console.error("Fetch order data error: ", error);
+      }
     };
-    //
-    fetchTransactionHistories();
+
+    fetchOrderData();
   }, []);
 
   return (
@@ -111,7 +62,7 @@ export default function TransactionHistory() {
                 <th>No. Order</th>
                 <th>Nama</th>
                 <th>Jenis Paket</th>
-                <th>Jumlah</th>
+                <th>Berat</th>
                 <th>Total</th>
                 <th>Uang Bayar</th>
                 <th>Kembalian</th>
@@ -128,9 +79,9 @@ export default function TransactionHistory() {
                   <td>{i + 1}</td>
                   <td>{transactionHistory.pesanan_id}</td>
                   <td>{transactionHistory.nama}</td>
-                  <td>{transactionHistory.jenis_layanan}</td>
-                  <td>{transactionHistory.jumlah}</td>
-                  <td>{transactionHistory.total}</td>
+                  <td>{transactionHistory.tanggal_pemesanan}</td>
+                  <td>{transactionHistory.berat_kg}</td>
+                  <td>{transactionHistory.total_harga}</td>
                   <td>{transactionHistory.uang_bayar}</td>
                   <td>{transactionHistory.kembalian}</td>
                   <td>{transactionHistory.status}</td>
